@@ -9,7 +9,8 @@
   "scripts": {
     "seed": "node data/generate.mjs",
     "pretest": "node scripts/prepare.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "start": "node app/server.mjs"
   },
   "devDependencies": {
     "playwright": "1.64.0"
