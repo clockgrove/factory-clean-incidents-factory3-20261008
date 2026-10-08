@@ -1,37 +1,34 @@
-# Synthetic support-incident explorer
+# Incident atlas
 
-This is an empty application starter with a deterministic fictional dataset. The application architecture, API, frontend structure, and implementation are deliberately open.
+A read-only local explorer for 2,400 fictional support incidents. Search IDs, titles and descriptions with case-insensitive literal matching; combine service, severity and status selections with inclusive UTC opened-date boundaries. Summaries and daily counts cover the entire matching result. Details expose all eleven fields as plain text.
 
-The qualification environment uses Node.js 24. Run `npm run seed` from this directory to create `.runtime/incidents.json`. The generator requires no packages or network access. Every invocation produces the same bytes. See `data/FIELDS.md` for the record meanings.
+## Start and stop
 
-Keep `data/generate.mjs` and `data/FIELDS.md` unchanged. The application must treat the generated dataset as read-only. Add application code, useful verification, and startup instructions as needed. The installed browser-verification tooling and its exact command will be documented in the shared execution environment before either route begins; this starter does not claim that a browser is already installed.
+Use Node.js 24. From the checkout, run:
 
-## Exact shared commands
-
-Generate the supplied canonical data:
-
-npm run seed
-
-Run complete verification, including meaningful application HTTP and browser checks you add:
-
-npm test
-
-The baseline uses Node's built-in `node:test` runner (generic `node --test` discovery). Its immutable data prerequisite runs before the test suite and installs the exact pinned development tooling with package lifecycle scripts disabled when needed. Keep the seed, pretest and test script bodies unchanged; add application verification in locations the generic Node test runner discovers. The initial passing data/tooling prerequisite is a tooling/data prerequisite, not application acceptance. Preserve `scripts/prepare.mjs` and the two `data/*` sources. Add the app, its startup instructions and meaningful real HTTP/browser verification without replacing these checks. Choose application architecture, API, UI and work breakdown freely.
-
-Declare and implement a local startup script for this exact command, then document the actual URL/port and shutdown procedure:
-
+```sh
+npm run pretest
 npm run start
+```
 
-## Installed browser environment
+Open **http://127.0.0.1:3000**. The server binds only to loopback. Stop it with Ctrl+C. The prerequisite generates the canonical `.runtime/incidents.json` and installs pinned tooling when needed. The application reads this file without modifying it. `npm run seed` also generates the same canonical data.
 
-All arms use the same pinned Playwright 1.64.0 and sandbox-enabled headless Chromium 156.0.8078.4. The provided package lock pins the Node browser tooling. Before importing Playwright for browser tests, set `PLAYWRIGHT_BROWSERS_PATH` to the provided browser directory. Use `{channel:'chromium', headless:true, chromiumSandbox:true}`; never add `--no-sandbox` or relax controls to pass a test.
+Results start with no filters, newest opened date first and 25 rows. Choose 25 or 50 rows and either sort direction. Equal sort keys use incident ID ascending. Critical is the highest severity. Search, filter and sort changes reset pagination. Back to results preserves the page and selections. Active filters are shown above the results; Clear filters restores defaults.
 
-The qualification host exposes the real `qualification-chromium` executable through a dedicated read-only tool prefix on PATH. Locate its alias using `command -v qualification-chromium`; the alias directory contains no application or account data. The browser directory is `../browsers` and the local library directory is `../host-libs/usr/lib/x86_64-linux-gnu` relative to that alias directory. Resolve those local tooling paths dynamically; do not hardcode a contributor workspace path in application code. Pass that library directory as `LD_LIBRARY_PATH` in Chromium's explicit child environment, with `ALSA_CONFIG_PATH` pointing to `../host-libs/usr/share/alsa/alsa.conf`. Do not assume arbitrary inherited environment variables survive worker isolation. Browser profiles and temporary files belong under the current checkout's ignored `.runtime/`; an explicit relative `TMPDIR='.runtime/browser-tmp'` (also TMP/TEMP) avoids Chromium's Linux socket-path length limit while keeping files in that workspace. Create that directory before launch, preserve the current checkout as cwd, and close the browser and any owned HTTP server in finally blocks. The controller's later shared screenshot assessment uses its independently proved short alias, retained separately.
+Named views use this browser's local storage and remember search, filters, sort and page size; opening a view starts at page one. Save the same name to replace it, or select a view to open/delete it. CSV exports all matching incidents in current sort order, with every field and quoted CSV escaping. Tags are represented as a JSON textual array; null resolved timestamps are empty fields. Daily chart counts also have an expandable text alternative. Loading and request errors preserve selections; Retry applies to the current intent. Filter choices load independently of results and have their own status and Retry filter choices button. Their completion cannot navigate away from details or replace result status. Saved views can reopen while choices are still loading.
 
-Run actual local HTTP requests and real browser interactions against your implemented backend. Include data/sort/filter/pagination/whole-result-summary/details/export correctness and the human Objective's saved-view, keyboard, responsive, loading, empty, genuine failure and retry journeys. Do not mock or replace responses, generate screenshots of an imagined app, or treat this browser prerequisite as proof of application acceptance. Tests and app-local screenshots may use ignored `.runtime/`; commit source/verification/startup instructions, not runtime profiles or node_modules. Report an exact environment limitation if a required operation remains unavailable.
+## Verify
 
-The same dedicated tool prefix also provides this actual browser/HTTP prerequisite command, after the data/tooling prerequisite has installed Playwright:
+The qualification environment provides the browser alias and sandbox-enabled Chromium. Run these commands in order:
 
+```sh
+npm run pretest
 qualification-browser-smoke
+npm test
+```
 
-It starts and closes a tiny real loopback HTTP page and sandbox-enabled Chromium, records actual process identities/launch argv and closure under ignored `.runtime/`, and reports the receipt path. It verifies the installed browser environment; it never supplies the application's behavior, design, API or passing acceptance.
+`npm test` retains the unchanged pretest prerequisite and generic `node --test` discovery. Tests independently calculate expectations from the real canonical dataset and make actual HTTP requests. A real sandboxed browser exercises filtering, ordering, page sizes, summaries, full details, saved views across reload, downloads, keyboard focus, a narrow viewport, loading/empty states, genuine broken-connection failures, retry and overlapping requests, including bootstrap options success/failure during navigation and newer result loading. Delayed requests still run the real backend; no application responses are mocked. Every owned browser and server closes in finally blocks. The prerequisite's canonical byte/hash audit and post-journey byte comparisons verify that data remains unchanged.
+
+The installed environment uses pinned Playwright 1.64.0 and Chromium 156.0.8078.4. Tests resolve `qualification-chromium` with `command -v`, set `PLAYWRIGHT_BROWSERS_PATH` to `../browsers` relative to its alias directory before importing Playwright, and launch with `{channel:'chromium', headless:true, chromiumSandbox:true}`. The explicit child environment uses `../host-libs/usr/lib/x86_64-linux-gnu` for `LD_LIBRARY_PATH`, `../host-libs/usr/share/alsa/alsa.conf` for `ALSA_CONFIG_PATH`, and relative `.runtime/browser-tmp` for TMPDIR/TMP/TEMP, preserving checkout cwd. Sandbox controls are never relaxed. An unavailable alias/browser is a verification environment failure, not a passing acceptance result.
+
+Ignored `.runtime/` holds prerequisite receipts, actual browser screenshots, the downloaded CSV and browser verification evidence. Runtime files and node_modules are not source deliverables. Keep `data/generate.mjs`, `data/FIELDS.md`, canonical data, lockfile and the existing seed/pretest/test scripts unchanged. No accounts, editing, external services or deployment are involved.
